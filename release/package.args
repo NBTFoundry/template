@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: MPL-2.0
+# The package description for tools/package.py (NBTFoundry/manager): one argument
+# per line. `make package` and the release workflow both use it; they add the
+# version, sequence, key, output and executable. Bridge 1.7: the payload is a
+# module or a guest built with the NBT toolchain, run by NBT Manager's
+# nbt-runner (runner); the native form's lines are in native.args.
+# Capabilities and limits: NBTFoundry/manager, docs/app-bridge.md.
+--app
+myapp
+--compat
+nbt_6.5_armv7
+--bridge
+1.7
+--bridge-uses
+show,controller,runner
+--bridge-optional
+status,live-settings
+# Settings: key|Label|default|choices, at most 12.
+--setting
+debug_log|Debug log|off|off,on
+# What the phone app shows before an install.
+--property
+Licence|MPL-2.0
+--text
+My App for NBT Manager.
+--text=
+--text
+Source, licences and notices: https://github.com/NBTFoundry/template

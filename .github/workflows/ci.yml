@@ -1,0 +1,84 @@
+# SPDX-License-Identifier: MPL-2.0
+# The host build and tests, the same under ASan/UBSan, against the
+# NBTFoundry/sdk commit in release/sdk.ref, and the head-unit forms built with
+# the NBT toolchain release that SDK pins: with the runner (module, guest) and
+# without (native). Keep the form the application uses. The package test runs
+# where NBT Manager's checkout and its nbt-verify are (a workstation), not here.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  host:
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [test, asan]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          path: app
+          submodules: recursive
+          persist-credentials: false
+      - id: pins
+        run: |
+          sdk="$(cat app/release/sdk.ref)"
+          [[ "$sdk" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::release/sdk.ref is not a commit"; exit 1; }
+          echo "sdk=$sdk" >>"$GITHUB_OUTPUT"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: NBTFoundry/sdk
+          ref: ${{ steps.pins.outputs.sdk }}
+          path: sdk
+          submodules: true
+          persist-credentials: false
+      - run: >-
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends
+          libx11-dev libegl-dev libgles-dev xvfb libegl-mesa0 libgl1-mesa-dri
+      - if: matrix.kind == 'test'
+        run: make -C app -j"$(nproc)" host
+      - if: matrix.kind == 'test'
+        run: make -C app test check-static-init
+      - if: matrix.kind == 'asan'
+        run: make -C app -j"$(nproc)" test-asan
+
+  head-unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          path: app
+          submodules: recursive
+          persist-credentials: false
+      - id: pins
+        run: |
+          sdk="$(cat app/release/sdk.ref)"
+          [[ "$sdk" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::release/sdk.ref is not a commit"; exit 1; }
+          echo "sdk=$sdk" >>"$GITHUB_OUTPUT"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: NBTFoundry/sdk
+          ref: ${{ steps.pins.outputs.sdk }}
+          path: sdk
+          submodules: true
+          persist-credentials: false
+      - run: make -C sdk toolchain
+      # With the runner, then without.
+      - run: make -C app -j"$(nproc)" module guest
+      - run: make -C app -j"$(nproc)" native native-check
+      # legal/NOTICE.txt is current (it carries the toolchain's notices).
+      - run: make -C app notice-check

@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: MPL-2.0
+# The native form's lines, read after package.args (`make package FORM=native`):
+# an ordinary program built with the NBT toolchain, started by NBT Manager
+# itself. No runner, so bridge 1.5 does. An application that keeps this form
+# puts these values in package.args and removes this file.
+--bridge
+1.5
+--bridge-uses
+show,controller

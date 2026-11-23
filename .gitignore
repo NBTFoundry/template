@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: MPL-2.0
+
+# Build output: build/ (BUILD_DIR) holds every kind of build,
+# the SDK, the VM test and packages.
+/build/
+
+# Objects and archives built outside build/ by hand.
+*.o
+*.d
+*.a
+*.so
+
+# Packages, releases and their checksums: published by CI, never committed.
+*.nbt
+*.nbtr
+*SHA256SUMS*
+
+# Signing keys: never in the repository (CI reads APPS_SIGNING_KEY).
+*.pem
+*.key
+*.p12
+
+# Python (tests, tools)
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Editors and tools
+.vscode/
+.idea/
+.cache/
+compile_commands.json
+.clangd/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Crash dumps and logs from local runs
+/core
+/core.[0-9]*
+*.core
+vgcore.*
+*.log

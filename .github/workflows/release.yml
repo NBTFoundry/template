@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: MPL-2.0
+# Signed package from a vMAJOR.MINOR.PATCH tag: NBT Manager's application release
+# workflow builds the payload on a plain runner with the NBT toolchain release the
+# SDK pins, signs it with the apps key (this repository's "release" environment,
+# secret APPS_SIGNING_KEY, after approval) and publishes myapp-X.Y.Z.nbt. The tag
+# gives the version and the sequence; release/package.args describes the package;
+# release/sdk.ref names the NBTFoundry/sdk commit it builds against (ci.yml reads
+# the same file).
+#
+# The last two lines follow the Makefile's FORM:
+#   module  make -j"$(nproc)" module                build/nbt-myapp.so
+#   guest   make -j"$(nproc)" guest                 build/nbt-myapp.guest
+#   native  make -j"$(nproc)" native native-check   build/nbt-myapp-native
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions: {}
+
+jobs:
+  pins:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      sdk: ${{ steps.read.outputs.sdk }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          sparse-checkout: release/sdk.ref
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - id: read
+        run: |
+          sdk="$(cat release/sdk.ref)"
+          [[ "$sdk" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::release/sdk.ref is not a commit"; exit 1; }
+          echo "sdk=$sdk" >>"$GITHUB_OUTPUT"
+
+  release:
+    needs: pins
+    uses: NBTFoundry/manager/.github/workflows/app-release.yml@85c9cecb7f34edaf3d18033d010e629b329b83d1 # manager main after v0.3.1: no build image by default
+    permissions:
+      contents: write
+      packages: read
+    # The apps key is an environment secret; a called workflow sees it only so.
+    secrets: inherit
+    with:
+      sdk-ref: ${{ needs.pins.outputs.sdk }}
+      build: make -j"$(nproc)" module
+      payload: build/nbt-myapp.so
