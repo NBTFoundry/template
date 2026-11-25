@@ -18,6 +18,8 @@
 # Signing keys: never in the repository (CI reads APPS_SIGNING_KEY).
 *.pem
 *.key
+# A developer key's public half is published (README, "Your own key").
+!release/developer-public.pem
 *.p12
 
 # Python (tests, tools)
