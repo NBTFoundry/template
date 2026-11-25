@@ -50,6 +50,8 @@ the program's licence decides the form. Before a first release: the
 
 ## Build
 
+Coding agents: [AGENTS.md](AGENTS.md).
+
 Needs the NBT App SDK next to this repository (`../sdk`, or `NBT_SDK_DIR`),
 gcc, Python 3, and the X11, EGL and GLESv2 development files; Xvfb for the
 tests.
