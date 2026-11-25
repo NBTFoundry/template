@@ -77,6 +77,25 @@ the settings. `release/sdk.ref` is the SDK commit CI and releases build
 against. `make notice` writes `legal/NOTICE.txt`; `make test` fails when it
 lags.
 
+## Your own key
+
+Without NBTFoundry's apps key, sign with a key of your own and add it to your
+car once (an NBT Manager with developer keys):
+
+```sh
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out ~/.nbt/myapp-key.pem  # keep it private
+openssl pkey -in ~/.nbt/myapp-key.pem -pubout -out release/developer-public.pem
+make APP_KEY=~/.nbt/myapp-key.pem package
+```
+
+- **On the car:** copy `release/developer-public.pem` to the phone; in the
+  NBT Manager app, Car › Manage › Developer keys › Pick a key file, then
+  confirm the same fingerprint on the car. Packages signed with that key then
+  install from the phone.
+- **Releases from CI:** the private key, base64, as `APPS_SIGNING_KEY` in the
+  `release` environment, and `public-key: release/developer-public.pem` under
+  `with:` in `.github/workflows/release.yml`.
+
 ## The form
 
 An application reaches the head unit in one of three forms. `FORM` in the
