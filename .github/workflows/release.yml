@@ -42,7 +42,7 @@ jobs:
 
   release:
     needs: pins
-    uses: NBTFoundry/manager/.github/workflows/app-release.yml@64d4c29b9e6a537a4be9feaf731ecee9e802bb63 # manager main: sign-package action, public-key for a developer key
+    uses: NBTFoundry/manager/.github/workflows/app-release.yml@d65d6e5a8b60ed1c22b395891734c2432c30c989 # manager v0.4.0
     permissions:
       contents: write
       packages: read
