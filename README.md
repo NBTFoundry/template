@@ -122,7 +122,10 @@ the head-unit builds on every push and pull request. A `vX.Y.Z` tag runs
 `.github/workflows/release.yml`: NBT Manager's application release workflow
 builds the payload, signs it with the apps key after a maintainer approves
 the run (the `release` environment, secret `APPS_SIGNING_KEY`) and publishes
-`myapp-X.Y.Z.nbt`, sequence `X*1000000 + Y*1000 + Z`.
+`myapp-X.Y.Z.nbt`, sequence `X*1000000 + Y*1000 + Z`. Before the tag, write
+`release/notes/X.Y.Z.md`: what the release changes for a car owner (headings
+`### New`, `### Improved`, `### Fixed`, `### Changed`, `### Good to know`). The
+build fails without it, and it tops the release's page.
 
 ## License
 
